@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UI Kit Playground — Live Style Toggles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<style>
+:root{
+  --bg:#f3eee1;
+  --panel:#fffdf6;
+  --ink:#15140d;
+  --muted:#726f60;
+  --line:#15140d;
+  --accent:#ff4c1c;
+  --accent-soft:#ffe14d;
+  --code-bg:#161509;
+  --code-ink:#efe9d6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Fraunces',Georgia,serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.mono{font-family:'JetBrains Mono',ui-monospace,'SFMono-Regular',Consolas,monospace}
+
+.app{min-height:100vh;display:grid;grid-template-columns:300px minmax(0,1fr)}
+
+aside{height:100vh;position:sticky;top:0;overflow:auto;border-right:2px solid var(--line);background:var(--panel);padding:22px 16px 16px;display:flex;flex-direction:column}
+.brand{padding-bottom:14px;border-bottom:2px solid var(--line)}
+.brand-title{display:block;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.brand-tag{display:block;margin-top:6px;font-style:italic;color:var(--muted);font-size:13px;line-height:1.4}
+
+.finder{margin:16px 0;padding:10px 12px;width:100%;border:2px solid var(--line);background:var(--panel);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none}
+.finder:focus{outline:3px solid var(--accent-soft);outline-offset:-3px}
+
+nav{overflow:auto;flex:1}
+.nav-group{margin-bottom:4px}
+.nav-group-title{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:12px 6px 6px;border-top:2px solid var(--line)}
+.nav-group:first-child .nav-group-title{border-top:0;padding-top:0}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:8px 6px;font-size:14px}
+.nav-item .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);width:20px;flex:none}
+.nav-item:hover{background:var(--accent-soft)}
+.nav-item.is-active{background:var(--ink);color:#fff}
+.nav-item.is-active .num{color:var(--accent-soft)}
+
+.foot{border-top:2px solid var(--line);margin-top:14px;padding-top:12px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.7;color:var(--muted)}
+
+main{padding:clamp(24px,4vw,56px);max-width:1180px;width:100%;margin:0 auto}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent)}
+.title-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:10px 0 18px}
+h1{margin:0;font-size:clamp(32px,4.2vw,54px);font-weight:700;line-height:1}
+.counter{font-family:'JetBrains Mono',monospace;font-size:11px;border:2px solid var(--line);padding:6px 10px;flex:none}
+.description{max-width:580px;font-size:16px;line-height:1.65;color:#3b3a33;margin:0 0 20px}
+
+.playground{border:2px solid var(--line);background:var(--panel);padding:16px 18px;margin:0 0 22px;display:flex;flex-wrap:wrap;gap:20px}
+.pg-group{display:flex;flex-direction:column;gap:8px}
+.pg-label{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.pg-row{display:flex;gap:8px;align-items:center}
+.pg-swatch{width:28px;height:28px;border:2px solid var(--line);padding:0}
+.pg-swatch.is-active{outline:3px solid var(--ink);outline-offset:2px}
+.pg-btn{border:2px solid var(--line);background:var(--panel);padding:7px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.pg-btn.is-active{background:var(--ink);color:#fff}
+.pg-btn:hover:not(.is-active){background:var(--accent-soft)}
+.pg-reset{margin-left:auto;align-self:center;border:2px solid var(--line);background:transparent;padding:7px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.pg-reset:hover{color:var(--ink);background:var(--accent-soft)}
+
+.preview-shell{border:2px solid var(--line);background:var(--panel)}
+.preview-head{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:2px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.canvas{background:#fff}
+.canvas iframe{display:block;width:100%;border:0;min-height:260px}
+
+.tabs{display:flex;gap:2px;margin-top:26px}
+.tab{border:2px solid var(--line);border-bottom:0;background:var(--panel);padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tab.is-active{background:var(--ink);color:#fff}
+.code{position:relative;border:2px solid var(--line);background:var(--code-bg)}
+.code pre{margin:0;padding:22px;overflow:auto;max-height:420px}
+.code code{color:var(--code-ink);font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.75;white-space:pre}
+.copy{position:absolute;right:12px;top:12px;border:2px solid var(--code-ink);background:transparent;color:var(--code-ink);font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:6px 10px}
+.copy:hover{background:var(--accent-soft);color:#111;border-color:var(--accent-soft)}
+.code-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin:8px 0 0}
+
+@media(max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{height:auto;position:static;border-right:0;border-bottom:2px solid var(--line)}
+  nav{display:flex;overflow:auto;gap:2px}
+  .nav-group{display:flex;align-items:center;margin-bottom:0}
+  .nav-group-title{border-top:0;padding:8px 10px;white-space:nowrap}
+  .nav-item{width:auto;white-space:nowrap}
+  .foot{display:none}
+  main{padding:26px 18px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <span class="brand-title">UI Kit Playground</span>
+      <span class="brand-tag">같은 32개 요소, 라이브 스타일 토글로 변형 실험</span>
+    </div>
+    <input id="filter" class="finder" placeholder="요소 검색…" aria-label="요소 검색" />
+    <nav id="menu" aria-label="UI 요소 목록"></nav>
+    <div class="foot">HTML · CSS · JS 전체 소스 공개<br>프리뷰 색상 · 크기 · 모서리 즉시 반영</div>
+  </aside>
+  <main>
+    <div class="eyebrow" id="category">Structure &amp; Navigation</div>
+    <div class="title-row">
+      <h1 id="title">Accordion</h1>
+      <span class="counter mono" id="counter">01 / 32</span>
+    </div>
+    <p class="description" id="description"></p>
+    <section class="playground" aria-label="프리뷰 스타일 토글">
+      <div class="pg-group">
+        <span class="pg-label">Accent</span>
+        <div class="pg-row" id="pgAccentRow"></div>
+      </div>
+      <div class="pg-group">
+        <span class="pg-label">Size</span>
+        <div class="pg-row" id="pgSizeRow"></div>
+      </div>
+      <div class="pg-group">
+        <span class="pg-label">Corners</span>
+        <div class="pg-row" id="pgRadiusRow"></div>
+      </div>
+      <button class="pg-reset" id="pgReset" type="button">Reset</button>
+    </section>
+    <section class="preview-shell">
+      <div class="preview-head"><span>Live Preview</span><span>sandboxed iframe</span></div>
+      <div class="canvas"><iframe id="preview" title="컴포넌트 미리보기" sandbox="allow-scripts allow-same-origin"></iframe></div>
+    </section>
+    <div class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="html" type="button" role="tab">HTML</button>
+      <button class="tab" data-tab="css" type="button" role="tab">CSS</button>
+      <button class="tab" data-tab="js" type="button" role="tab">JAVASCRIPT</button>
+    </div>
+    <section class="code"><button class="copy" id="copy" type="button">Copy</button><pre><code id="code"></code></pre></section>
+    <p class="code-note">코드 탭은 원본 소스 그대로입니다. 위 토글은 프리뷰에만 적용됩니다.</p>
+  </main>
+</div>
+<script>
+const CATEGORY_ORDER = ['Structure & Navigation','Menus','Actions & Controls','Input & Forms','Content Display','Feedback & Status'];
+
+const DATA = [
+{name:'Accordion',category:'Structure & Navigation',desc:'관련 콘텐츠를 묶어서 펼치고 접을 수 있게 하는 컨테이너입니다.',
+html:`<div class="accordion">
+  <div class="accordion-item is-open">
+    <button class="accordion-trigger" aria-expanded="true">배송 정책<span class="accordion-icon">−</span></button>
+    <div class="accordion-panel"><p>오후 2시 이전 주문은 당일 출고됩니다.</p></div>
+  </div>
+  <div class="accordion-item">
+    <button class="accordion-trigger" aria-expanded="false">교환 및 반품<span class="accordion-icon">+</span></button>
+    <div class="accordion-panel"><p>수령 후 7일 이내 신청할 수 있습니다.</p></div>
+  </div>
+  <div class="accordion-item">
+    <button class="accordion-trigger" aria-expanded="false">국제 배송<span class="accordion-icon">+</span></button>
+    <div class="accordion-panel"><p>일부 국가는 통관 절차로 지연될 수 있습니다.</p></div>
+  </div>
+</div>`,
+css:`.accordion{border-top:2px solid #111}
+.accordion-item{border-bottom:2px solid #111}
+.accordion-trigger{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;padding:16px 4px;font:600 15px/1.4 sans-serif;text-align:left;cursor:pointer;color:#111}
+.accordion-icon{font-size:18px}
+.accordion-panel{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.accordion-panel p{margin:0 0 16px;padding:0 4px;font-size:13px;color:#444;line-height:1.6}
+.accordion-item.is-open .accordion-panel{max-height:120px}`,
+js:`document.querySelectorAll('.accordion-trigger').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var item = btn.closest('.accordion-item');
+    var open = item.classList.contains('is-open');
+    item.classList.toggle('is-open', !open);
+    btn.setAttribute('aria-expanded', String(!open));
+    btn.querySelector('.accordion-icon').textContent = !open ? '−' : '+';
+  });
+});`},
+
+{name:'Breadcrumb',category:'Structure & Navigation',desc:'현재 페이지의 상위 경로를 순서대로 보여주는 탐색 보조 요소입니다.',
+html:`<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="#">홈</a><span>/</span><a href="#">스토어</a><span>/</span><a href="#">러닝</a><span>/</span><b>러닝화</b>
+</nav>`,
+css:`.breadcrumb{font:13px sans-serif;color:#666;display:flex;gap:6px;align-items:center}
+.breadcrumb a{color:#666;text-decoration:none}
+.breadcrumb a:hover{color:#111;text-decoration:underline}
+.breadcrumb b{color:#111}
+.breadcrumb span{color:#bbb}`,
+js:`// 정적 탐색 요소로 자바스크립트가 필요하지 않습니다.`},
+
+{name:'Pagination',category:'Structure & Navigation',desc:'긴 목록을 여러 페이지로 나누고 현재 위치를 보여줍니다.',
+html:`<nav class="pagination" aria-label="페이지 이동">
+  <button class="page-btn" type="button" data-page="prev">←</button>
+  <button class="page-btn is-active" type="button">1</button>
+  <button class="page-btn" type="button">2</button>
+  <button class="page-btn" type="button">3</button>
+  <button class="page-btn" type="button" data-page="next">→</button>
+</nav>`,
+css:`.pagination{display:flex;gap:6px}
+.page-btn{width:36px;height:36px;border:2px solid #111;background:#fff;font:13px sans-serif;cursor:pointer}
+.page-btn.is-active{background:#111;color:#fff}
+.page-btn:hover:not(.is-active){background:#ffe14d}`,
+js:`var pageButtons = Array.prototype.slice.call(document.querySelectorAll('.page-btn:not([data-page])'));
+function setActive(i){
+  pageButtons.forEach(function(b){ b.classList.remove('is-active'); });
+  pageButtons[i].classList.add('is-active');
+}
+pageButtons.forEach(function(btn, i){
+  btn.addEventListener('click', function(){ setActive(i); });
+});
+document.querySelector('[data-page="prev"]').addEventListener('click', function(){
+  var idx = pageButtons.findIndex(function(b){ return b.classList.contains('is-active'); });
+  setActive(Math.max(0, idx - 1));
+});
+document.querySelector('[data-page="next"]').addEventListener('click', function(){
+  var idx = pageButtons.findIndex(function(b){ return b.classList.contains('is-active'); });
+  setActive(Math.min(pageButtons.length - 1, idx + 1));
+});`},
+
+{name:'Sidebar',category:'Structure & Navigation',desc:'화면 한쪽에 배치되어 주요 탐색이나 보조 콘텐츠를 상시 노출합니다.',
+html:`<div class="sidebar-demo">
+  <nav class="sidebar-nav">
+    <b class="sidebar-brand">WORKSPACE</b>
+    <a href="#" class="sidebar-link is-active">Overview</a>
+    <a href="#" class="sidebar-link">Projects</a>
+    <a href="#" class="sidebar-link">Settings</a>
+  </nav>
+  <div class="sidebar-content"><b>프로젝트 개요</b><p>사이드바를 통한 안정적인 전역 탐색을 제공합니다.</p></div>
+</div>`,
+css:`.sidebar-demo{display:grid;grid-template-columns:130px 1fr;border:2px solid #111;min-height:160px}
+.sidebar-nav{background:#111;color:#fff;padding:16px;display:grid;gap:12px;align-content:start;font:12px sans-serif}
+.sidebar-brand{font-size:11px;letter-spacing:.08em;opacity:.7}
+.sidebar-link{color:#ddd;text-decoration:none}
+.sidebar-link.is-active{color:#ffe14d;font-weight:700}
+.sidebar-content{padding:16px;font:13px sans-serif}
+.sidebar-content p{color:#666;margin:6px 0 0}`,
+js:`document.querySelectorAll('.sidebar-link').forEach(function(link){
+  link.addEventListener('click', function(e){
+    e.preventDefault();
+    document.querySelectorAll('.sidebar-link').forEach(function(l){ l.classList.remove('is-active'); });
+    link.classList.add('is-active');
+  });
+});`},
+
+{name:'Tab Bar',category:'Structure & Navigation',desc:'화면 하단에서 앱의 주요 영역을 빠르게 전환하는 내비게이션입니다.',
+html:`<div class="tabbar-demo">
+  <div class="tabbar-panel">홈 화면의 콘텐츠 영역입니다.</div>
+  <nav class="tabbar">
+    <button class="tabbar-btn is-active" type="button">홈</button>
+    <button class="tabbar-btn" type="button">검색</button>
+    <button class="tabbar-btn" type="button">저장</button>
+    <button class="tabbar-btn" type="button">내 정보</button>
+  </nav>
+</div>`,
+css:`.tabbar-demo{border:2px solid #111;max-width:320px}
+.tabbar-panel{padding:24px 16px;font:13px sans-serif;color:#555}
+.tabbar{display:flex;border-top:2px solid #111}
+.tabbar-btn{flex:1;border:0;background:#fff;padding:12px 4px;font:11px sans-serif;color:#888;cursor:pointer}
+.tabbar-btn.is-active{color:#111;font-weight:700;background:#ffe14d}`,
+js:`var panel = document.querySelector('.tabbar-panel');
+document.querySelectorAll('.tabbar-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tabbar-btn').forEach(function(b){ b.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+    panel.textContent = btn.textContent + ' 화면의 콘텐츠 영역입니다.';
+  });
+});`},
+
+{name:'Bento Menu',category:'Menus',desc:'크기가 다른 그리드 타일로 여러 진입점을 한 번에 보여주는 메뉴입니다.',
+html:`<nav class="bento">
+  <a class="bento-tile bento-tile--big" href="#">오늘의 추천</a>
+  <a class="bento-tile" href="#">신상품</a>
+  <a class="bento-tile" href="#">주문 내역</a>
+  <a class="bento-tile" href="#">쿠폰함</a>
+  <a class="bento-tile" href="#">고객센터</a>
+</nav>`,
+css:`.bento{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:70px;gap:8px}
+.bento-tile{grid-row:span 1;border:2px solid #111;display:flex;align-items:flex-end;padding:10px;font:700 13px/1.3 sans-serif;color:#111;text-decoration:none}
+.bento-tile--big{grid-row:span 2;background:#111;color:#fff}
+.bento-tile:hover{background:#ffe14d}
+.bento-tile--big:hover{background:#111;color:#ffe14d}`,
+js:`// 정적 그리드 메뉴로 자바스크립트가 필요하지 않습니다.`},
+
+{name:'Döner Menu',category:'Menus',desc:'길이가 다른 세 줄로 필터·정렬 옵션을 나타내는 아이콘 메뉴입니다.',
+html:`<button class="doner-btn" aria-label="필터 열기" type="button">
+  <span class="doner-line" style="width:24px"></span>
+  <span class="doner-line" style="width:16px"></span>
+  <span class="doner-line" style="width:9px"></span>
+</button>`,
+css:`.doner-btn{display:inline-flex;flex-direction:column;gap:5px;padding:12px;border:2px solid #111;background:#fff;cursor:pointer}
+.doner-line{height:2px;background:#111;display:block}
+.doner-btn:hover{background:#ffe14d}`,
+js:`// 정적 아이콘 버튼입니다. 클릭 시 실제 필터 패널을 여는 로직을 연결하세요.`},
+
+{name:'Dropdown',category:'Menus',desc:'목록을 펼쳐 하나의 옵션을 선택하게 하는 입력 컨트롤입니다.',
+html:`<div class="dropdown-field">
+  <label class="dropdown-label" for="country">배송 국가</label>
+  <select id="country" class="dropdown-select">
+    <option>대한민국</option>
+    <option>일본</option>
+    <option>미국</option>
+    <option>독일</option>
+  </select>
+</div>`,
+css:`.dropdown-field{max-width:240px}
+.dropdown-label{display:block;font:700 12px sans-serif;margin-bottom:6px}
+.dropdown-select{width:100%;border:2px solid #111;background:#fff;padding:10px 12px;font:14px sans-serif;color:#111}
+.dropdown-select:focus{outline:3px solid #ffe14d;outline-offset:0}`,
+js:`// 네이티브 select 요소를 사용해 별도 자바스크립트 없이 키보드 접근성을 확보합니다.`},
+
+{name:'Hamburger Menu',category:'Menus',desc:'동일한 길이의 세 줄로 숨겨진 전체 내비게이션을 의미합니다.',
+html:`<button class="burger" aria-expanded="false" aria-label="메뉴 열기" type="button">
+  <span></span><span></span><span></span>
+</button>`,
+css:`.burger{display:inline-flex;flex-direction:column;gap:5px;width:44px;height:44px;justify-content:center;align-items:center;border:2px solid #111;background:#fff;cursor:pointer}
+.burger span{width:22px;height:2px;background:#111;transition:transform .2s,opacity .2s}
+.burger.is-open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.is-open span:nth-child(2){opacity:0}
+.burger.is-open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}`,
+js:`var burger = document.querySelector('.burger');
+burger.addEventListener('click', function(){
+  var open = burger.classList.toggle('is-open');
+  burger.setAttribute('aria-expanded', String(open));
+});`},
+
+{name:'Kebab Menu',category:'Menus',desc:'세로로 놓인 점 세 개로 부가 작업 목록을 여는 아이콘입니다.',
+html:`<div class="kebab-wrap">
+  <button class="kebab-btn" aria-haspopup="true" aria-expanded="false" type="button" aria-label="추가 옵션">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="kebab-menu">
+    <li><button type="button">수정</button></li>
+    <li><button type="button">공유</button></li>
+    <li><button type="button">삭제</button></li>
+  </ul>
+</div>`,
+css:`.kebab-wrap{position:relative;display:inline-block}
+.kebab-btn{display:inline-flex;flex-direction:column;gap:3px;padding:10px;border:2px solid #111;background:#fff;cursor:pointer}
+.kebab-btn span{width:4px;height:4px;background:#111;border-radius:50%}
+.kebab-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:120px;border:2px solid #111;background:#fff;list-style:none;margin:0;padding:4px;display:none}
+.kebab-menu.is-open{display:block}
+.kebab-menu button{width:100%;text-align:left;border:0;background:none;padding:8px 10px;font:13px sans-serif;cursor:pointer}
+.kebab-menu button:hover{background:#ffe14d}`,
+js:`var btn = document.querySelector('.kebab-btn');
+var menu = document.querySelector('.kebab-menu');
+btn.addEventListener('click', function(){
+  var open = menu.classList.toggle('is-open');
+  btn.setAttribute('aria-expanded', String(open));
+});`},
+
+{name:'Meatballs Menu',category:'Menus',desc:'가로로 놓인 점 세 개로 추가 옵션을 드러내는 아이콘입니다.',
+html:`<div class="meatballs-wrap">
+  <button class="meatballs-btn" aria-haspopup="true" aria-expanded="false" type="button" aria-label="추가 옵션">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="meatballs-menu">
+    <li><button type="button">고정</button></li>
+    <li><button type="button">숨기기</button></li>
+    <li><button type="button">신고</button></li>
+  </ul>
+</div>`,
+css:`.meatballs-wrap{position:relative;display:inline-block}
+.meatballs-btn{display:inline-flex;gap:3px;padding:10px;border:2px solid #111;background:#fff;cursor:pointer}
+.meatballs-btn span{width:4px;height:4px;border-radius:50%;background:#111}
+.meatballs-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:110px;border:2px solid #111;background:#fff;list-style:none;margin:0;padding:4px;display:none}
+.meatballs-menu.is-open{display:block}
+.meatballs-menu button{width:100%;text-align:left;border:0;background:none;padding:8px 10px;font:13px sans-serif;cursor:pointer}
+.meatballs-menu button:hover{background:#ffe14d}`,
+js:`var btn = document.querySelector('.meatballs-btn');
+var menu = document.querySelector('.meatballs-menu');
+btn.addEventListener('click', function(){
+  var open = menu.classList.toggle('is-open');
+  btn.setAttribute('aria-expanded', String(open));
+});`},
+
+{name:'Button',category:'Actions & Controls',desc:'라벨이 있는 도형으로, 클릭 시 특정 동작을 실행합니다.',
+html:`<div class="btn-row">
+  <button class="btn btn--primary" type="button">장바구니 담기</button>
+  <button class="btn btn--ghost" type="button">나중에 보기</button>
+</div>`,
+css:`.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:2px solid #111;padding:12px 18px;font:700 14px sans-serif;cursor:pointer;background:#fff;color:#111;box-shadow:4px 4px 0 #111;transition:transform .12s,box-shadow .12s}
+.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 #111}
+.btn--primary{background:#111;color:#fff}
+.btn--primary:hover{background:#ffe14d;color:#111}
+.btn--ghost:hover{background:#ffe14d}`,
+js:`// 버튼 클릭 이벤트는 실제 기능(장바구니 담기 등)에 연결하세요.
+// 시각 피드백은 CSS active 상태만으로 처리됩니다.`},
+
+{name:'Checkbox',category:'Actions & Controls',desc:'여러 옵션을 독립적으로 선택하거나 해제하는 작은 사각 박스입니다.',
+html:`<fieldset class="check-group">
+  <legend>알림 수신 설정</legend>
+  <label class="check-line"><input type="checkbox" checked> 마케팅 정보</label>
+  <label class="check-line"><input type="checkbox"> SMS 수신</label>
+  <label class="check-line"><input type="checkbox"> 이메일 수신</label>
+</fieldset>`,
+css:`.check-group{border:2px solid #111;padding:16px;display:grid;gap:10px}
+.check-group legend{font:700 12px sans-serif;padding:0 6px}
+.check-line{display:flex;align-items:center;gap:10px;font:14px sans-serif}
+.check-line input{width:18px;height:18px;accent-color:#111}`,
+js:`// 네이티브 checkbox 상태는 브라우저가 관리합니다. 값 저장이 필요하면 change 이벤트에서 읽으세요.`},
+
+{name:'Radio Buttons',category:'Actions & Controls',desc:'여러 선택지 중 하나만 고를 수 있는 원형 컨트롤입니다.',
+html:`<fieldset class="radio-group">
+  <legend>배송 방법</legend>
+  <label class="check-line"><input type="radio" name="ship" checked> 일반 배송</label>
+  <label class="check-line"><input type="radio" name="ship"> 새벽 배송</label>
+  <label class="check-line"><input type="radio" name="ship"> 매장 수령</label>
+</fieldset>`,
+css:`.radio-group{border:2px solid #111;padding:16px;display:grid;gap:10px}
+.radio-group legend{font:700 12px sans-serif;padding:0 6px}
+.check-line{display:flex;align-items:center;gap:10px;font:14px sans-serif}
+.check-line input{width:18px;height:18px;accent-color:#111}`,
+js:`// 라디오 버튼은 name 속성으로 그룹화되어 하나만 선택됩니다. 별도 자바스크립트가 필요하지 않습니다.`},
+
+{name:'Slider Controls',category:'Actions & Controls',desc:'드래그로 값을 세밀하게 조절하는 입력 요소입니다.',
+html:`<div class="slider-block">
+  <div class="slider-head"><span>예산</span><output id="sliderValue">120,000원</output></div>
+  <input type="range" class="slider" min="0" max="300000" step="10000" value="120000">
+</div>`,
+css:`.slider-block{display:grid;gap:10px}
+.slider-head{display:flex;justify-content:space-between;font:700 13px sans-serif}
+.slider{-webkit-appearance:none;width:100%;height:2px;background:#111}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:#111;border:2px solid #111;cursor:pointer}
+.slider::-moz-range-thumb{width:20px;height:20px;background:#111;border:2px solid #111;cursor:pointer}`,
+js:`var slider = document.querySelector('.slider');
+var out = document.querySelector('#sliderValue');
+slider.addEventListener('input', function(){
+  out.textContent = Number(slider.value).toLocaleString('ko-KR') + '원';
+});`},
+
+{name:'Stepper',category:'Actions & Controls',desc:'정해진 단위로 값을 증가·감소시키는 컨트롤입니다.',
+html:`<div class="stepper-row">
+  <div class="stepper">
+    <button type="button" class="stepper-btn" data-dir="-1">−</button>
+    <span class="stepper-value">1</span>
+    <button type="button" class="stepper-btn" data-dir="1">+</button>
+  </div>
+  <span class="stepper-label">수량 선택</span>
+</div>`,
+css:`.stepper-row{display:flex;align-items:center;gap:12px}
+.stepper{display:inline-flex;border:2px solid #111}
+.stepper-btn{width:38px;height:38px;border:0;background:#fff;font:16px sans-serif;cursor:pointer}
+.stepper-btn:hover{background:#ffe14d}
+.stepper-value{width:38px;height:38px;display:grid;place-items:center;border-left:2px solid #111;border-right:2px solid #111;font:700 14px sans-serif}
+.stepper-label{font:13px sans-serif;color:#555}`,
+js:`var value = document.querySelector('.stepper-value');
+document.querySelectorAll('.stepper-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var next = Number(value.textContent) + Number(btn.dataset.dir);
+    value.textContent = Math.max(0, next);
+  });
+});`},
+
+{name:'Toggle',category:'Actions & Controls',desc:'켜짐과 꺼짐, 두 상태를 전환하는 스위치입니다.',
+html:`<div class="toggle-row">
+  <button type="button" class="toggle is-on" role="switch" aria-checked="true"><span class="toggle-dot"></span></button>
+  <div><b>새 소식 알림</b><div class="toggle-desc">중요한 업데이트를 알려드립니다.</div></div>
+</div>`,
+css:`.toggle-row{display:flex;align-items:center;gap:12px}
+.toggle{width:52px;height:28px;border:2px solid #111;background:#fff;padding:2px;cursor:pointer;position:relative}
+.toggle-dot{display:block;width:20px;height:20px;background:#111;transition:transform .18s}
+.toggle.is-on{background:#111}
+.toggle.is-on .toggle-dot{background:#ffe14d;transform:translateX(22px)}
+.toggle-desc{font:12px sans-serif;color:#666}`,
+js:`var toggle = document.querySelector('.toggle');
+toggle.addEventListener('click', function(){
+  var on = toggle.classList.toggle('is-on');
+  toggle.setAttribute('aria-checked', String(on));
+});`},
+
+{name:'Form',category:'Input & Forms',desc:'여러 개의 관련 입력값을 모아 한 번에 제출하는 구조입니다.',
+html:`<form class="form-block">
+  <label class="form-label">이름<input class="form-field" name="name" placeholder="이름을 입력하세요"></label>
+  <label class="form-label">이메일<input class="form-field" type="email" name="email" placeholder="you@example.com" required></label>
+  <button class="btn btn--primary" type="submit">저장하기</button>
+  <p class="form-msg" aria-live="polite"></p>
+</form>`,
+css:`.form-block{display:grid;gap:12px;max-width:320px}
+.form-label{display:grid;gap:6px;font:700 12px sans-serif}
+.form-field{border:2px solid #111;padding:10px 12px;font:14px sans-serif}
+.form-field:focus{outline:3px solid #ffe14d}
+.btn{border:2px solid #111;padding:12px 18px;font:700 14px sans-serif;cursor:pointer}
+.btn--primary{background:#111;color:#fff}
+.btn--primary:hover{background:#ffe14d;color:#111}
+.form-msg{font:12px sans-serif;color:#0a7a2f;min-height:16px}`,
+js:`var form = document.querySelector('.form-block');
+var msg = document.querySelector('.form-msg');
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  msg.textContent = '저장되었습니다.';
+});`},
+
+{name:'Input Field',category:'Input & Forms',desc:'사용자가 텍스트나 데이터를 직접 입력하는 영역입니다.',
+html:`<label class="field-label">프로젝트 이름
+  <input class="field-input" value="UI Elements Lab">
+</label>`,
+css:`.field-label{display:grid;gap:6px;font:700 12px sans-serif;max-width:320px}
+.field-input{border:2px solid #111;padding:10px 12px;font:14px sans-serif}
+.field-input:focus{outline:3px solid #ffe14d}`,
+js:`// 네이티브 input 요소로 별도 자바스크립트 없이 작동합니다. 유효성 검사가 필요하면 input 이벤트를 사용하세요.`},
+
+{name:'Picker',category:'Input & Forms',desc:'날짜나 시간처럼 형식이 정해진 값을 선택하는 도구입니다.',
+html:`<label class="field-label">배송 희망일
+  <input class="field-input" type="date" value="2026-09-15">
+</label>`,
+css:`.field-label{display:grid;gap:6px;font:700 12px sans-serif;max-width:320px}
+.field-input{border:2px solid #111;padding:10px 12px;font:14px sans-serif}
+.field-input:focus{outline:3px solid #ffe14d}`,
+js:`// 네이티브 date input을 사용해 브라우저와 OS의 달력 UI를 그대로 활용합니다.`},
+
+{name:'Search Field',category:'Input & Forms',desc:'돋보기 아이콘과 입력창으로 콘텐츠 검색을 제공합니다.',
+html:`<div class="search-field">
+  <span class="search-icon" aria-hidden="true">⌕</span>
+  <input class="search-input" type="search" placeholder="상품, 브랜드, 카테고리 검색">
+</div>`,
+css:`.search-field{position:relative;max-width:320px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:18px}
+.search-input{width:100%;border:2px solid #111;padding:10px 12px 10px 34px;font:14px sans-serif}
+.search-input:focus{outline:3px solid #ffe14d}`,
+js:`// 검색 실행 로직은 keydown(Enter) 또는 폼 submit 이벤트에 연결하세요.`},
+
+{name:'Card',category:'Content Display',desc:'콘텐츠와 행동을 하나의 독립된 모듈로 요약해 보여주는 표면입니다.',
+html:`<article class="card">
+  <span class="card-badge">NEW</span>
+  <h3 class="card-title">가벼운 러닝의 시작</h3>
+  <p class="card-desc">일상의 페이스를 위한 쿠셔닝과 안정감.</p>
+  <button class="btn btn--primary" type="button">자세히 보기</button>
+</article>`,
+css:`.card{border:2px solid #111;padding:20px;max-width:280px;box-shadow:6px 6px 0 #111}
+.card-badge{display:inline-block;background:#111;color:#fff;font:700 10px sans-serif;padding:3px 8px;margin-bottom:10px}
+.card-title{margin:0 0 8px;font:700 18px serif}
+.card-desc{margin:0 0 16px;font:13px sans-serif;color:#555}
+.btn{border:2px solid #111;padding:10px 16px;font:700 13px sans-serif;background:#111;color:#fff;cursor:pointer}
+.btn:hover{background:#ffe14d;color:#111}`,
+js:`// 정적 콘텐츠 카드로 자바스크립트가 필요하지 않습니다.`},
+
+{name:'Carousel',category:'Content Display',desc:'같은 영역에서 여러 콘텐츠를 좌우로 넘겨보게 하는 요소입니다.',
+html:`<div class="carousel">
+  <button class="carousel-btn" data-dir="-1" aria-label="이전">←</button>
+  <div class="carousel-track">
+    <div class="carousel-slide">01 · Essentials</div>
+    <div class="carousel-slide">02 · New arrivals</div>
+    <div class="carousel-slide">03 · Stories</div>
+  </div>
+  <button class="carousel-btn" data-dir="1" aria-label="다음">→</button>
+</div>`,
+css:`.carousel{display:flex;align-items:center;gap:10px;max-width:360px}
+.carousel-track{display:flex;gap:10px;overflow:hidden;scroll-behavior:smooth}
+.carousel-slide{min-width:150px;height:100px;border:2px solid #111;display:flex;align-items:center;justify-content:center;font:700 13px sans-serif;flex:0 0 auto}
+.carousel-slide:nth-child(2){background:#111;color:#fff}
+.carousel-btn{border:2px solid #111;background:#fff;width:32px;height:32px;cursor:pointer}
+.carousel-btn:hover{background:#ffe14d}`,
+js:`var track = document.querySelector('.carousel-track');
+document.querySelectorAll('.carousel-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    track.scrollBy({ left: Number(btn.dataset.dir) * 160, behavior: 'smooth' });
+  });
+});`},
+
+{name:'Comment',category:'Content Display',desc:'사용자가 남긴 의견을 시간 순서로 보여주는 콘텐츠 단위입니다.',
+html:`<div class="comment">
+  <div class="comment-avatar">KB</div>
+  <div>
+    <b class="comment-author">Kyungtae</b>
+    <span class="comment-time">방금 전</span>
+    <p class="comment-text">컴포넌트 구조가 아주 명료하네요.</p>
+  </div>
+</div>`,
+css:`.comment{display:flex;gap:12px;max-width:340px}
+.comment-avatar{width:38px;height:38px;border:2px solid #111;display:grid;place-items:center;font:700 12px sans-serif;flex:0 0 auto}
+.comment-author{font:700 13px sans-serif;margin-right:8px}
+.comment-time{font:12px sans-serif;color:#888}
+.comment-text{margin:6px 0 0;font:13px sans-serif;line-height:1.5}`,
+js:`// 정적 콘텐츠 블록으로 자바스크립트가 필요하지 않습니다. 답글 기능은 별도 폼과 연결하세요.`},
+
+{name:'Feed',category:'Content Display',desc:'활동이나 업데이트 내역을 시간 흐름에 따라 나열합니다.',
+html:`<ul class="feed">
+  <li class="feed-item"><b>주문이 준비 중입니다</b><span>2분 전 · ORD-2026</span></li>
+  <li class="feed-item"><b>새 쿠폰이 도착했습니다</b><span>1시간 전</span></li>
+  <li class="feed-item"><b>배송이 시작되었습니다</b><span>어제</span></li>
+</ul>`,
+css:`.feed{list-style:none;margin:0;padding:0;max-width:320px;border-top:2px solid #111}
+.feed-item{display:flex;flex-direction:column;gap:4px;padding:14px 4px;border-bottom:2px solid #111;font:14px sans-serif}
+.feed-item span{font:12px sans-serif;color:#888}`,
+js:`// 실시간 업데이트가 필요하면 WebSocket 또는 폴링으로 목록 맨 위에 새 li를 추가하세요.`},
+
+{name:'Icon',category:'Content Display',desc:'작은 시각 기호로 의미를 전달하거나 특정 동작을 유도합니다.',
+html:`<div class="icon-row">
+  <button class="icon-btn" title="즐겨찾기">♡</button>
+  <button class="icon-btn" title="공유">↗</button>
+  <button class="icon-btn" title="삭제">⌫</button>
+</div>`,
+css:`.icon-row{display:flex;gap:8px}
+.icon-btn{width:42px;height:42px;border:2px solid #111;background:#fff;font-size:18px;cursor:pointer}
+.icon-btn:hover{background:#ffe14d}`,
+js:`// 아이콘 버튼의 title 속성이 접근성 레이블 역할을 합니다. 실제 동작은 click 이벤트에 연결하세요.`},
+
+{name:'Tag',category:'Content Display',desc:'관련 키워드로 콘텐츠를 분류하고 탐색을 돕는 라벨입니다.',
+html:`<div class="tag-row">
+  <span class="tag">#running <button class="tag-remove" aria-label="태그 제거">×</button></span>
+  <span class="tag">#minimal <button class="tag-remove" aria-label="태그 제거">×</button></span>
+  <span class="tag">#new <button class="tag-remove" aria-label="태그 제거">×</button></span>
+</div>`,
+css:`.tag-row{display:flex;gap:8px;flex-wrap:wrap}
+.tag{border:2px solid #111;padding:6px 6px 6px 12px;font:12px sans-serif;display:inline-flex;align-items:center;gap:6px}
+.tag-remove{border:0;background:none;cursor:pointer;font-size:14px;line-height:1;padding:2px}
+.tag-remove:hover{color:#c1121f}`,
+js:`document.querySelectorAll('.tag-remove').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    btn.closest('.tag').remove();
+  });
+});`},
+
+{name:'Loader',category:'Feedback & Status',desc:'시스템이 백그라운드 작업을 처리 중임을 알리는 표시입니다.',
+html:`<div class="loader-row">
+  <span class="loader" role="status" aria-label="로딩 중"></span>
+  <div><b>데이터를 불러오는 중</b><div class="loader-desc">잠시만 기다려 주세요.</div></div>
+</div>`,
+css:`.loader-row{display:flex;align-items:center;gap:12px}
+.loader{width:28px;height:28px;border:3px solid #ddd;border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-desc{font:12px sans-serif;color:#666}`,
+js:`// CSS 애니메이션만으로 동작합니다. 실제 로딩이 끝나면 요소를 완료 상태 아이콘으로 교체하세요.`},
+
+{name:'Modal',category:'Feedback & Status',desc:'다른 상호작용을 막고 확인이 필요한 정보를 표시하는 박스입니다.',
+html:`<div class="modal-stage">
+  <section class="modal" role="dialog" aria-modal="true" aria-label="삭제 확인">
+    <b class="modal-title">삭제할까요?</b>
+    <p class="modal-desc">이 작업은 되돌릴 수 없습니다.</p>
+    <div class="modal-actions">
+      <button class="btn btn--ghost" type="button">취소</button>
+      <button class="btn btn--primary" type="button">삭제</button>
+    </div>
+  </section>
+</div>`,
+css:`.modal-stage{background:#f2f2ec;border:2px dashed #999;padding:24px;display:grid;place-items:center}
+.modal{background:#fff;border:2px solid #111;box-shadow:6px 6px 0 #111;padding:20px;width:min(100%,280px)}
+.modal-title{font:700 15px sans-serif}
+.modal-desc{font:13px sans-serif;color:#555;margin:8px 0 16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.btn{border:2px solid #111;padding:8px 14px;font:700 13px sans-serif;cursor:pointer;background:#fff}
+.btn--primary{background:#111;color:#fff}
+.btn--primary:hover{background:#c1121f;border-color:#c1121f}
+.btn--ghost:hover{background:#ffe14d}`,
+js:`// 실제 서비스에서는 트리거 버튼 클릭 시 이 모달을 열고, 배경(backdrop) 클릭이나 Esc 키로 닫습니다.`},
+
+{name:'Notification',category:'Feedback & Status',desc:'메시지, 오류, 완료 등 주의가 필요한 상태를 알립니다.',
+html:`<div class="notif-row">
+  <span class="notif-icon">🔔<i class="notif-dot"></i></span>
+  <div><b>새로운 알림 3개</b><div class="notif-desc">확인하지 않은 업데이트가 있습니다.</div></div>
+</div>`,
+css:`.notif-row{display:flex;align-items:center;gap:12px}
+.notif-icon{position:relative;font-size:22px;font-style:normal}
+.notif-dot{position:absolute;top:-2px;right:-4px;width:9px;height:9px;background:#c1121f;border:2px solid #fff;border-radius:50%}
+.notif-desc{font:12px sans-serif;color:#666}`,
+js:`// 알림 배지(dot)는 서버에서 unread count를 받아 표시 여부를 토글하세요.`},
+
+{name:'Progress Bar',category:'Feedback & Status',desc:'여러 단계 중 현재 진행 정도를 시각적으로 보여줍니다.',
+html:`<div class="progress-block">
+  <div class="progress-head"><b>주문 진행</b><span>62%</span></div>
+  <div class="progress-track"><div class="progress-fill" style="width:62%"></div></div>
+  <div class="progress-steps">결제 → 상품 준비 → 배송</div>
+</div>`,
+css:`.progress-block{display:grid;gap:8px;max-width:300px}
+.progress-head{display:flex;justify-content:space-between;font:13px sans-serif}
+.progress-track{height:10px;border:2px solid #111;background:#fff}
+.progress-fill{height:100%;background:#111}
+.progress-steps{font:11px sans-serif;color:#888}`,
+js:`// 진행률 값은 서버 응답이나 단계 변화에 맞춰 fill 요소의 width를 갱신하세요.`},
+
+{name:'Tooltip',category:'Feedback & Status',desc:'요소에 대한 짧은 설명을 마우스오버 시 보여주는 힌트입니다.',
+html:`<div class="tooltip-demo">
+  <button class="icon-btn tooltip-trigger" type="button" aria-describedby="tip1">♡</button>
+  <span class="tooltip" id="tip1" role="tooltip">저장 목록에 추가</span>
+</div>`,
+css:`.tooltip-demo{position:relative;display:inline-block;padding-top:40px}
+.icon-btn{width:42px;height:42px;border:2px solid #111;background:#fff;font-size:18px;cursor:pointer}
+.tooltip{position:absolute;bottom:calc(100% - 4px);left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:6px 10px;font:11px sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+.tooltip-trigger:hover + .tooltip,.tooltip-trigger:focus + .tooltip{opacity:1}`,
+js:`// 순수 CSS :hover/:focus로 표시됩니다. 터치 기기에서는 click으로 토글하는 로직을 추가하세요.`}
+];
+
+const ACCENT_HEX = '#ffe14d';
+const ACCENT_PRESETS = [
+  {name:'Amber', value:'#ffe14d'},
+  {name:'Mint', value:'#7cf2ac'},
+  {name:'Sky', value:'#7ec8ff'},
+  {name:'Rose', value:'#ff9fd6'}
+];
+const SIZE_PRESETS = [
+  {name:'S', value:0.85},
+  {name:'M', value:1},
+  {name:'L', value:1.25}
+];
+const RADIUS_PRESETS = [
+  {name:'Sharp', value:0},
+  {name:'Soft', value:8},
+  {name:'Round', value:20}
+];
+const CIRCLE_SELECTOR = '.kebab-btn span,.meatballs-btn span,.loader,.notif-dot';
+
+let pgAccent = ACCENT_PRESETS[0].value;
+let pgSize = SIZE_PRESETS[1].value;
+let pgRadius = RADIUS_PRESETS[0].value;
+
+const els = {
+  menu: document.getElementById('menu'),
+  filter: document.getElementById('filter'),
+  frame: document.getElementById('preview'),
+  code: document.getElementById('code'),
+  copy: document.getElementById('copy'),
+  title: document.getElementById('title'),
+  category: document.getElementById('category'),
+  description: document.getElementById('description'),
+  counter: document.getElementById('counter'),
+  pgAccentRow: document.getElementById('pgAccentRow'),
+  pgSizeRow: document.getElementById('pgSizeRow'),
+  pgRadiusRow: document.getElementById('pgRadiusRow'),
+  pgReset: document.getElementById('pgReset')
+};
+
+let current = 0;
+let activeTab = 'html';
+
+function esc(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildDoc(item){
+  const css = pgAccent === ACCENT_HEX ? item.css : item.css.split(ACCENT_HEX).join(pgAccent);
+  const override = '*[class]{border-radius:' + pgRadius + 'px}' + CIRCLE_SELECTOR + '{border-radius:50%}body{zoom:' + pgSize + '}';
+  return '<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}body{margin:0;padding:28px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#111;background:#fff;-webkit-font-smoothing:antialiased}' + css + override + '</style></head><body>' + item.html + '<script>' + item.js + '<\/script></body></html>';
+}
+
+function renderMenu(filter){
+  filter = (filter || '').trim().toLowerCase();
+  els.menu.innerHTML = '';
+  CATEGORY_ORDER.forEach(function(cat){
+    const indices = [];
+    DATA.forEach(function(item, i){ if (item.category === cat) indices.push(i); });
+    const visible = indices.filter(function(i){ return DATA[i].name.toLowerCase().indexOf(filter) !== -1; });
+    if (!visible.length) return;
+    const group = document.createElement('div');
+    group.className = 'nav-group';
+    const title = document.createElement('div');
+    title.className = 'nav-group-title';
+    title.textContent = cat;
+    group.appendChild(title);
+    visible.forEach(function(i){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'nav-item' + (i === current ? ' is-active' : '');
+      btn.innerHTML = '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + DATA[i].name;
+      btn.addEventListener('click', function(){ render(i); });
+      group.appendChild(btn);
+    });
+    els.menu.appendChild(group);
+  });
+}
+
+function renderPreview(){
+  const item = DATA[current];
+  els.frame.srcdoc = buildDoc(item);
+  els.frame.onload = function(){
+    try { els.frame.style.height = els.frame.contentDocument.body.scrollHeight + 'px'; } catch (e) {}
+  };
+}
+
+function render(index){
+  current = index;
+  const item = DATA[index];
+  els.title.textContent = item.name;
+  els.category.textContent = item.category;
+  els.description.textContent = item.desc;
+  els.counter.textContent = String(index + 1).padStart(2, '0') + ' / 32';
+  renderPreview();
+  renderMenu(els.filter.value);
+  showCode();
+}
+
+function showCode(){
+  const item = DATA[current];
+  const src = activeTab === 'html' ? item.html : activeTab === 'css' ? item.css : item.js;
+  els.code.innerHTML = esc(src);
+}
+
+function buildToggleRow(container, presets, currentValue, onPick, swatch){
+  container.innerHTML = '';
+  presets.forEach(function(preset){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = (swatch ? 'pg-swatch' : 'pg-btn') + (preset.value === currentValue ? ' is-active' : '');
+    if (swatch) {
+      btn.style.background = preset.value;
+      btn.title = preset.name;
+    } else {
+      btn.textContent = preset.name;
+    }
+    btn.addEventListener('click', function(){ onPick(preset.value); });
+    container.appendChild(btn);
+  });
+}
+
+function renderControls(){
+  buildToggleRow(els.pgAccentRow, ACCENT_PRESETS, pgAccent, function(v){ pgAccent = v; renderControls(); renderPreview(); }, true);
+  buildToggleRow(els.pgSizeRow, SIZE_PRESETS, pgSize, function(v){ pgSize = v; renderControls(); renderPreview(); }, false);
+  buildToggleRow(els.pgRadiusRow, RADIUS_PRESETS, pgRadius, function(v){ pgRadius = v; renderControls(); renderPreview(); }, false);
+}
+
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('click', function(){
+    activeTab = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('is-active', t === tab); });
+    showCode();
+  });
+});
+
+els.filter.addEventListener('input', function(e){ renderMenu(e.target.value); });
+
+els.copy.addEventListener('click', function(){
+  const item = DATA[current];
+  const src = activeTab === 'html' ? item.html : activeTab === 'css' ? item.css : item.js;
+  navigator.clipboard.writeText(src).then(function(){
+    const old = els.copy.textContent;
+    els.copy.textContent = 'Copied';
+    setTimeout(function(){ els.copy.textContent = old; }, 1100);
+  });
+});
+
+els.pgReset.addEventListener('click', function(){
+  pgAccent = ACCENT_PRESETS[0].value;
+  pgSize = SIZE_PRESETS[1].value;
+  pgRadius = RADIUS_PRESETS[0].value;
+  renderControls();
+  renderPreview();
+});
+
+renderControls();
+renderMenu('');
+render(0);
+</script>
+</body>
+</html>
